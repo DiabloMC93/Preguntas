@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Oposiciones Enfermería - Temas 11, 12 y 13</title>
+    <style>
+        :root {
+            --primary: #00796b; /* Teal */
+            --primary-dark: #004d40;
+            --secondary: #e0f2f1;
+            --accent: #ffc107;
+            --text: #37474f;
+            --correct: #4caf50;
+            --correct-bg: #e8f5e9;
+            --wrong: #f44336;
+            --wrong-bg: #ffebee;
+            --bg-color: #f5f7fa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .app-container {
+            background: white;
+            width: 100%;
+            max-width: 800px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 600px;
+        }
+
+        /* Header & Stats */
+        .header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .score-board {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .score-pill {
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background-color: var(--secondary);
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--accent);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Question Area */
+        .quiz-content {
+            padding: 30px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .question-meta {
+            color: #78909c;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .question-category {
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 25px;
+            color: var(--primary-dark);
+        }
+
+        /* Options */
+        .options-grid {
+            display: grid;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid #cfd8dc;
+            border-radius: 10px;
+            padding: 15px 20px;
+            text-align: left;
+            font-size: 1rem;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            outline: none;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: var(--primary);
+            background-color: var(--secondary);
+        }
+
+        .option-btn:disabled {
+            cursor: default;
+        }
+
+        /* States for answers */
+        .option-btn.correct {
+            border-color: var(--correct);
+            background-color: var(--correct-bg);
+            color: var(--correct-dark);
+        }
+        
+        .option-btn.correct::after {
+            content: "✓";
+            position: absolute;
+            right: 20px;
+            color: var(--correct);
+            font-weight: bold;
+        }
+
+        .option-btn.wrong {
+            border-color: var(--wrong);
+            background-color: var(--wrong-bg);
+            color: var(--wrong-dark);
+        }
+
+        .option-btn.wrong::after {
+            content: "✕";
+            position: absolute;
+            right: 20px;
+            color: var(--wrong);
+            font-weight: bold;
+        }
+
+        /* Footer / Navigation */
+        .footer {
+            padding: 20px 30px;
+            border-top: 1px solid #eceff1;
+            display: flex;
+            justify-content: flex-end;
+            background-color: #fff;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: none; /* Hidden by default */
+        }
+
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Results Screen */
+        .results-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px;
+            height: 100%;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,77,64,0.3);
+        }
+
+        .score-number {
+            font-size: 3rem;
+            font-weight: bold;
+        }
+
+        .score-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .restart-btn {
+            background-color: var(--text);
+            color: white;
+            margin-top: 20px;
+        }
+
+        /* Start Screen */
+        .start-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 50px;
+            height: 100%;
+        }
+
+        .start-screen h2 {
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        
+        .start-screen p {
+            margin-bottom: 30px;
+            color: #666;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .app-container {
+                border-radius: 0;
+                height: 100vh;
+                max-width: 100%;
+            }
+            body {
+                padding: 0;
+            }
+            .header {
+                padding: 15px 20px;
+            }
+            .score-board span {
+                display: none; /* Hide text label on small screens */
+            }
+            .score-pill {
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <h1>Test Enfermería</h1>
+        <div class="score-board">
+            <div class="score-pill" style="border-left: 3px solid #4caf50;">
+                <span style="display:inline;">✅</span> <span id="score-correct">0</span>
+            </div>
+            <div class="score-pill" style="border-left: 3px solid #f44336;">
+                <span style="display:inline;">❌</span> <span id="score-wrong">0</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <!-- Start Screen -->
+    <div class="start-screen" id="start-screen">
+        <h2>Temas 11, 12 y 13</h2>
+        <p>Ética, Bioética, Deontología e Historia Clínica</p>
+        <p>70 preguntas para repasar.</p>
+        <button class="btn" style="display: inline-block;" onclick="startQuiz()">Comenzar Test</button>
+    </div>
+
+    <!-- Quiz Content -->
+    <div class="quiz-content" id="quiz-content" style="display: none;">
+        <div class="question-meta">
+            <span>Pregunta <span id="current-q-num">1</span> de <span id="total-q-num">20</span></span>
+            <span class="question-category" id="question-category">Tema 11</span>
+        </div>
+        <div class="question-text" id="question-text">
+            ¿Cargando pregunta...?
+        </div>
+        <div class="options-grid" id="options-container">
+            <!-- Options will be injected here -->
+        </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div class="results-screen" id="results-screen">
+        <div class="score-circle">
+            <span class="score-number" id="final-score">0</span>
+            <span class="score-label">Puntos</span>
+        </div>
+        <h2>Test Completado</h2>
+        <p id="feedback-message">¡Buen trabajo!</p>
+        <div style="margin-top: 10px; color: #666;">
+            Aciertos: <strong style="color:var(--correct);" id="final-correct">0</strong> | 
+            Fallos: <strong style="color:var(--wrong);" id="final-wrong">0</strong>
+        </div>
+        <button class="btn restart-btn" style="display: inline-block;" onclick="restartQuiz()">Repetir Test</button>
+    </div>
+
+    <div class="footer">
+        <button class="btn" id="next-btn" onclick="nextQuestion()">Siguiente Pregunta ➜</button>
+    </div>
+</div>
+
+<script>
+    // Base de datos de preguntas
+    const questionsDB = [
+        // --- TEMA 11 (20 preguntas) ---
+        {
+            category: "Tema 11",
+            question: "¿Cuál es la principal diferencia entre la Moral y la Ética?",
+            options: [
+                "La Ética actúa como una brújula que nos orienta en situaciones concretas y la Moral discute sus fundamentos.",
+                "Ambos términos se refieren al mismo concepto de valores y no existe una distinción funcional relevante.",
+                "La moral es el conjunto de normas que dirigen el comportamiento, mientras que la Ética es la reflexión teórica sobre dichas normas.",
+                "La moral es un ideal de vida buena y la Ética establece los mínimos exigibles para la convivencia."
+            ],
+            correct: 2 
+        },
+        {
+            category: "Tema 11",
+            question: "¿Qué entendemos por “moral”?",
+            options: [
+                "Conjunto de principios, criterios, normas y valores que dirigen nuestro comportamiento.",
+                "Reflexión teórica sobre la moral.",
+                "Encargada de discutir y fundamentar reflexivamente el conjunto de principios o normas.",
+                "Ninguna es correcta."
+            ],
+            correct: 0
+        },
+        {
+            category: "Tema 11",
+            question: "¿Qué finalidad tienen los códigos éticos?",
+            options: [
+                "Actúan como directrices a la hora de fijar los estándares prácticos.",
+                "Dar a conocer al público las conductas que se pueden esperar de quienes prestan atención sanitaria.",
+                "Tratar problemas que plantean la disponibilidad, las prestaciones y las políticas.",
+                "a y b son correctas."
+            ],
+            correct: 3 
+        },
+        {
+            category: "Tema 11",
+            question: "¿Cuál es la razón fundamental por la que la ética es necesaria?",
+            options: [
+                "Es necesaria principalmente para proteger los derechos de las personas, lo cual es su única finalidad.",
+                "La ética es necesaria porque refleja los valores, códigos morales y los principios sobre los que se fundamenta lo que es bueno o malo y preside una conducta correcta.",
+                "Es indispensable para autogobernar una profesión y establecer sus códigos, que es su aplicación más amplia.",
+                "Su necesidad se limita a la ética sanitaria, tratando problemas de disponibilidad y políticas de salud."
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 11",
+            question: "¿Por qué es necesaria la ética? (Versión resumida)",
+            options: [
+                "Protege los derechos de las personas.",
+                "Refleja valores y principios sobre lo bueno y lo malo.",
+                "Regula políticas sanitarias.",
+                "Constituyen la base de los códigos de ética profesionales."
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 11",
+            question: "¿Qué característica define a la Ética de Máximos?",
+            options: [
+                "Consiste en establecer un nivel mínimo de moralidad por debajo del cual solo está lo inhumano.",
+                "Es el ideal de vida buena que atañe a cada persona, pero que no puede ampliarse ni exigirse al conjunto de la comunidad.",
+                "Es la base de la convivencia comunitaria cuyos principios son legalmente exigibles para todos los ciudadanos.",
+                "Es la reflexión teórica sobre la moral civil, buscando fundamentar sus principios comunes."
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 11",
+            question: "¿Cuál es la finalidad de la conducta ética?",
+            options: [
+                "Proteger los derechos de las personas.",
+                "Servir como directrices para fijar los estándares prácticos.",
+                "Autogobernarse una profesión.",
+                "Servir de base los códigos de ética profesionales."
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 11",
+            question: "¿Cuál es el objetivo principal de la ética sanitaria?",
+            options: [
+                "El estudio de la biología molecular.",
+                "Los problemas relacionados con la disponibilidad, las prestaciones y las políticas sanitarias.",
+                "La organización de los hospitales.",
+                "La gestión de los recursos naturales."
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 11",
+            question: "¿Qué establece y representa principalmente la Ética de Mínimos?",
+            options: [
+                "Consiste en la reflexión teórica sobre la moral, fundamentando reflexivamente los principios y normas.",
+                "Es el ideal de vida buena que atañe a cada persona y no es exigible al conjunto de la comunidad.",
+                "Establece unos puntos comunes en los que todos están de acuerdo y constituye la ética de la democracia y civil.",
+                "Se refiere a la moral individual que no tiene relación con los principios de la vida en sociedad."
+            ],
+            correct: 2
+        },
+        {
+            category: "Tema 11",
+            question: "¿Con qué se relaciona la ética de mínimos?",
+            options: [
+                "Ética de democracia.",
+                "Ética de dictadura.",
+                "Ética individual.",
+                "Ninguna de las anteriores."
+            ],
+            correct: 0
+        },
+        {
+            category: "Tema 11",
+            question: "Etimológicamente, ¿de qué palabra proviene 'dignidad' y cuál es su significado?",
+            options: [
+                "Del griego ethos y significa costumbre.",
+                "Del latín dignus y se traduce por 'valioso'.",
+                "Del latín humanus y significa superioridad.",
+                "Del griego autónomos y significa libertad."
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 11",
+            question: "¿Qué es la deontología?",
+            options: [
+                "El estudio sobre la evolución humana.",
+                "El conjunto de principios morales que implican deber y guían la práctica profesional.",
+                "Un código legal obligatorio para cualquier profesión.",
+                "Una teoría filosófica sobre la naturaleza del ser."
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 11",
+            question: "Los códigos deontológicos son:",
+            options: [
+                "Sólo son morales.",
+                "Poseen una naturaleza mixta, de normas morales y normas legales.",
+                "Poseen una naturaleza legal.",
+                "Ninguna es correcta."
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 11",
+            question: "¿Qué caracteriza a la 'Dignidad Ontológica'?",
+            options: [
+                "Radica en el ser y es irrenunciable, independientemente del comportamiento.",
+                "Radica en el obrar y depende de las buenas acciones.",
+                "Es una dignidad que se puede perder si se cometen delitos graves.",
+                "Depende del reconocimiento público y social."
+            ],
+            correct: 0
+        },
+        {
+            category: "Tema 11",
+            question: "A diferencia de la ontológica, ¿a qué se refiere la 'Dignidad Ética'?",
+            options: [
+                "A la naturaleza biológica del ser humano.",
+                "A la naturaleza de nuestros actos y nuestra manera de conducirnos (el obrar).",
+                "A los derechos otorgados por la Constitución.",
+                "Al estatus profesional de la enfermera."
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 11",
+            question: "¿En qué se diferencia la dignidad ética de la ontológica?",
+            options: [
+                "La ética es innata y la ontológica adquirida.",
+                "La ética depende de los actos humanos, la ontológica no.",
+                "Ambas significan lo mismo.",
+                "La ética sólo existe en contexto religioso."
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 11",
+            question: "¿Qué dice la Declaración Universal de Derecho Humanos respecto a la dignidad?",
+            options: [
+                "Es un concepto secundario.",
+                "Se basa exclusivamente en el comportamiento individual.",
+                "Solo aplica a ciertos grupos sociales.",
+                "Debe de asegurarse como objetivo común a todos los profesionales sanitarios."
+            ],
+            correct: 3
+        },
+        {
+            category: "Tema 11",
+            question: "¿Qué significado presenta la palabra Deontología?",
+            options: [
+                "Procede de la palabra griega, que significa 'deber/obligación'.",
+                "Procede del latín, que significa 'deber/hacer'.",
+                "Procede de la palabra griega, que significa 'buen obrar'.",
+                "Ninguna de las anteriores son correctas."
+            ],
+            correct: 0
+        },
+        {
+            category: "Tema 11",
+            question: "¿Cuál es el fundamento principal de la dignidad humana?",
+            options: [
+                "La capacidad de eliminar las diferencias entre los individuos para lograr la igualdad.",
+                "El reconocimiento de que toda persona merece respeto, independientemente de sus diferencias.",
+                "La afirmación de la virtud propia por encima de la dignidad de los demás.",
+                "El resultado de un desequilibrio emocional que permite afirmar la personalidad."
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 11",
+            question: "¿Qué proyección normativa poseen los códigos deontológicos?",
+            options: [
+                "Constituyen la proyección normativa de una ética de mínimos para orientar la práctica profesional.",
+                "Representa una ética de máximos dirigida a imponer normas estrictas.",
+                "Funcionan como leyes penales aplicables a todas las profesiones.",
+                "Actúan como normas exclusivamente religiosas."
+            ],
+            correct: 0
+        },
+
+        // --- TEMA 12 (30 preguntas) ---
+        {
+            category: "Tema 12",
+            question: "¿Cuál de estos no es un punto esencial de la tarea de cuidar? (Las 5 Cs)",
+            options: [
+                "Compasión",
+                "Comprensión",
+                "Confianza",
+                "Consciencia"
+            ],
+            correct: 1 
+        },
+        {
+            category: "Tema 12",
+            question: "¿En qué se centra la definición de cuidados de enfermería según Henderson?",
+            options: [
+                "Población en general.",
+                "Población que presenta enfermedades crónicas.",
+                "Individuo en función del cuidado a nivel físico.",
+                "Individuo en función del cuidado a nivel psicológico."
+            ],
+            correct: 2 
+        },
+        {
+            category: "Tema 12",
+            question: "¿Cuál es uno de los principales roles del profesional de enfermería en relación con los valores, la sociedad y los derechos humanos?",
+            options: [
+                "Cumplir únicamente con las cuestiones médicas.",
+                "Priorizar las normas institucionales por encima de la decisión del paciente.",
+                "Adoptar un rol de defensora de los derechos del paciente y garantizar su dignidad y autonomía.",
+                "Centrar su labor exclusivamente en los aspectos técnicos del cuidado."
+            ],
+            correct: 2
+        },
+        {
+            category: "Tema 12",
+            question: "En el modelo de responsabilidad moral propuesto por Virginia Henderson, ¿cuál es el principio moral básico que se busca promover?",
+            options: [
+                "El principio de Justicia.",
+                "El principio de No-Maleficencia.",
+                "El principio de Beneficencia paternalista.",
+                "El principio de Autonomía."
+            ],
+            correct: 3
+        },
+        {
+            category: "Tema 12",
+            question: "Una de las Obligaciones morales derivadas del modelo de Virginia Henderson, esenciales para fomentar la autonomía del paciente, es:",
+            options: [
+                "La prudencia.",
+                "La benevolencia.",
+                "La veracidad y la información.",
+                "La tolerancia."
+            ],
+            correct: 2
+        },
+        {
+            category: "Tema 12",
+            question: "¿Qué virtud moral derivada del modelo de Virginia Henderson hace referencia a la capacidad de ser fiel a los compromisos y a la verdad en la relación de ayuda?",
+            options: [
+                "Prudencia",
+                "Benevolencia",
+                "Tolerancia",
+                "Fidelidad"
+            ],
+            correct: 3
+        },
+        {
+            category: "Tema 12",
+            question: "¿Quién definió la enfermería como “una práctica moral basada en la exigencia moral de promover el bienestar del paciente por medio de cuidar de él mediante una relación personal”?",
+            options: [
+                "M. Leininger",
+                "A. Bishop y J Scudder",
+                "L. Curtin",
+                "B. Carper"
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 12",
+            question: "Tener un desarrollo intelectual óptimo es un principio que tiene relación con:",
+            options: [
+                "El paciente y su familia",
+                "La profesión y el trabajo en equipo.",
+                "La sociedad y los derechos humanos",
+                "La administración hospitalaria."
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 12",
+            question: "¿Cuáles son los constructos éticos del cuidador?",
+            options: [
+                "Compasión, competencia, confidencia, consecuencia y empatía",
+                "Compasión, competencia, confidencia, confianza y consciencia",
+                "Tolerancia, competencia, confidencia, confianza y consciencia",
+                "Empatía, compasión, consecuencia, consciencia y tolerancia"
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 12",
+            question: "¿Cuál de los siguientes autores propone el cuidado como esencia de la enfermería?",
+            options: [
+                "Curtin",
+                "Carper",
+                "Leininger",
+                "Scudder"
+            ],
+            correct: 2
+        },
+        {
+            category: "Tema 12",
+            question: "¿Cuál es la finalidad última de la labor sanitaria y del buen “cuidado”?",
+            options: [
+                "Alcanzar la excelencia profesional como fin en sí mismo.",
+                "Mejorar la imagen institucional de los servicios de salud.",
+                "Restablecer o prevenir la salud y aliviar el dolor o sufrimiento del paciente.",
+                "Garantizar la satisfacción del paciente en todo momento."
+            ],
+            correct: 2
+        },
+        {
+            category: "Tema 12",
+            question: "La excelencia del cuidado enfermero se alcanza cuando:",
+            options: [
+                "predomina la eficacia técnica sobre la dimensión moral.",
+                "se integra la competencia técnica y la virtud moral en la práctica profesional.",
+                "La enfermera actúa solo desde la empatía y la sensibilidad.",
+                "Se prioriza la organización del trabajo sobre la atención al paciente."
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 12",
+            question: "¿Cuales de las siguientes afirmaciones no corresponde a la relación entre profesionales de enfermería y paciente?",
+            options: [
+                "El reconocimiento del otro como persona única.",
+                "La implicación del profesional de enfermería en el proceso de atención.",
+                "La relación enfermera-paciente se basa solo en la técnica y no en la participación del paciente.",
+                "La libertad del paciente para participar activamente en la relación y en el proceso del cuidado."
+            ],
+            correct: 2
+        },
+        {
+            category: "Tema 12",
+            question: "Según C.R.Taylor, ¿cuál es la razón de ser de la enfermería que delimita las tareas a realizar?",
+            options: [
+                "Salud",
+                "Ética",
+                "Cuidados",
+                "Eficacia"
+            ],
+            correct: 2
+        },
+        {
+            category: "Tema 12",
+            question: "Los valores y principios de ética se organizan en relación:",
+            options: [
+                "Con la propia profesión, el trabajo en equipo, con el paciente, su familia, la sociedad y los derechos humanos.",
+                "Con la propia profesión, el trabajo individual, con el paciente, su familia, la sociedad y los derechos humanos.",
+                "Con el sistema sanitario, el trabajo en equipo, con el paciente, su familia, la sociedad y los derechos humanos.",
+                "Con el sistema sanitario, el trabajo individual, con el paciente, su familia, la sociedad y los derechos humanos."
+            ],
+            correct: 0
+        },
+        {
+            category: "Tema 12",
+            question: "El valor fundamental en los cuidados de enfermería que permite entender las emociones del paciente es:",
+            options: [
+                "Compasión",
+                "Integridad moral",
+                "Responsabilidad profesional",
+                "Empatía"
+            ],
+            correct: 3
+        },
+        {
+            category: "Tema 12",
+            question: "¿Qué valor necesario para el cuidado describe la capacidad del profesional de sentir y comprender el sufrimiento y la desgracia de la otra persona...?",
+            options: [
+                "La Integridad",
+                "La Compasión",
+                "La Empatía",
+                "La Responsabilidad Profesional"
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 12",
+            question: "La confianza en el profesional cuidador es un vínculo que exige el reconocimiento de dos elementos clave. ¿Cuáles son?",
+            options: [
+                "Su fe absoluta en la sanación y su autoridad.",
+                "Su eficiencia en la acción y su destreza técnica.",
+                "Su autoridad profesional/moral y su carácter finito/vulnerable.",
+                "Su poder democrático y su independencia de los 'mass media'."
+            ],
+            correct: 2
+        },
+        {
+            category: "Tema 12",
+            question: "¿Qué significa la conciencia cuando es entendida como virtud en el contexto del constructo ético del cuidar?",
+            options: [
+                "La dignidad intrínseca del ser humano vulnerable.",
+                "Reflexión, prudencia, cautela y conocimiento de la cosa.",
+                "Un atributo exclusivo de la interioridad profesional.",
+                "Pensar que el modo de obrar es siempre excelente."
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 12",
+            question: "¿Cuál es el principio ético más importante en las profesiones asistenciales?",
+            options: [
+                "Autonomía",
+                "Beneficencia",
+                "No-maleficencia",
+                "La justicia"
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 12",
+            question: "La calidad asistencial depende principalmente de:",
+            options: [
+                "La rapidez en la atención.",
+                "Los recursos materiales del hospital.",
+                "La capacidad y la integridad ética de los profesionales sanitarios.",
+                "La satisfacción del paciente."
+            ],
+            correct: 2
+        },
+        {
+            category: "Tema 12",
+            question: "La fiabilidad e integridad moral en la enfermería se define como:",
+            options: [
+                "La capacidad de cumplir con los protocolos técnicos establecidos por la institución.",
+                "La adhesión a las normas morales y la confianza que inspira quien obra con carácter, buena fe, incorruptibilidad y honestidad.",
+                "La habilidad para resolver conflictos laborales dentro del equipo de salud.",
+                "La disposición a priorizar los intereses del paciente sobre los valores personales."
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 12",
+            question: "A día de hoy el trabajo enfermero se desarrolla en una entorno sanitario complejo, ¿cómo podríamos decir que se toman muchas de las decisiones?",
+            options: [
+                "En base a avances tecnológicos y científicos.",
+                "Según lo que digan los médicos.",
+                "Determinadas por creencias y experiencias personales anteriores.",
+                "Siguiendo un protocolo previamente establecido por la ley."
+            ],
+            correct: 0
+        },
+        {
+            category: "Tema 12",
+            question: "¿Cúal de los siguientes valores se considera fundamental en la relación de la enfermería con el paciente y su familia?",
+            options: [
+                "La competencia técnica",
+                "La empatía",
+                "El desarrollo intelectual",
+                "Rol de defensa de los derechos del paciente"
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 12",
+            question: "¿Qué cualidad es esencial para el profesional de enfermería al tomar decisiones dentro del equipo de trabajo o de forma autónoma?",
+            options: [
+                "La rapidez en la ejecución de procedimientos.",
+                "La capacidad de discernir con prudencia entre lo bueno y lo malo.",
+                "La obediencia a las órdenes médicas sin cuestionarlas.",
+                "La habilidad para realizar técnicas complejas."
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 12",
+            question: "En relación con la sociedad y los derechos humanos, ¿cuál es el rol que adopta el profesional de enfermería ante el paciente?",
+            options: [
+                "Un rol de mediadora entre la familia y el hospital.",
+                "Un rol de supervisora del trabajo médico.",
+                "Un rol de defensora de los derechos y la autonomía del paciente.",
+                "Un rol de gestora de recursos sanitarios."
+            ],
+            correct: 2
+        },
+        {
+            category: "Tema 12",
+            question: "¿Cúal de estas opciones no corresponde con un nivel de organización de los valores y principios éticos?",
+            options: [
+                "La sociedad y los derechos humanos.",
+                "La profesión y el trabajo en equipo.",
+                "La técnica y la eficiencia operativa.",
+                "Todas son correctas."
+            ],
+            correct: 2
+        },
+        {
+            category: "Tema 12",
+            question: "¿Qué tipo de juicio requieren los problemas éticos en el trabajo cotidiano del profesional de enfermería?",
+            options: [
+                "Juicio legal",
+                "Juicio administrativo",
+                "Juicio clínico",
+                "Juicio técnico"
+            ],
+            correct: 2
+        },
+        {
+            category: "Tema 12",
+            question: "¿Qué busca la auténtica compasión?",
+            options: [
+                "El desarrollo de la autonomía ajena y no su dependencia y servidumbre.",
+                "Entender las necesidades del paciente y saber gestionarlas de manera efectiva.",
+                "Atender a alguien que se encuentra en una situación de vulnerabilidad y dependencia.",
+                "Relacionarse con personas que demandan una atención de cuidados en una situación vital determinada."
+            ],
+            correct: 0
+        },
+        {
+            category: "Tema 12",
+            question: "¿Por qué se considera que el cuidado es el “bien interno” de la enfermería?",
+            options: [
+                "Porque representa el objetivo técnico de la atención sanitaria.",
+                "Porque se identifica únicamente con la asistencia física al paciente.",
+                "Porque da sentido moral y profesional a la práctica enfermera, siendo su esencia.",
+                "Porque sustituye a la autonomía del paciente en el proceso de decisión."
+            ],
+            correct: 2
+        },
+
+        // --- TEMA 13 (20 preguntas NUEVAS) ---
+        {
+            category: "Tema 13",
+            question: "¿Cuál es una de las funciones principales de la historia clínica?",
+            options: [
+                "Decorativa",
+                "Asistencial",
+                "Administrativa",
+                "Comercial"
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 13",
+            question: "Para que el registro de la historia clínica sea válido, debe ser:",
+            options: [
+                "Breve y resumido",
+                "Veraz, completo y claro",
+                "Subjetivo y flexible",
+                "Anónimo y sin fecha"
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 13",
+            question: "¿Qué documento recoge los datos de la entrevista inicial y la exploración física del paciente?",
+            options: [
+                "Informe clínico de alta",
+                "Anamnesis y exploración física",
+                "Órdenes médicas",
+                "Hoja de interconsulta"
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 13",
+            question: "¿Cuál de los siguientes documentos se entrega obligatoriamente al paciente al finalizar un episodio asistencial?",
+            options: [
+                "Informe de anatomía patológica",
+                "Informe clínico de alta",
+                "Informe de anestesia",
+                "Hoja de interconsulta"
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 13",
+            question: "El consentimiento informado se define como:",
+            options: [
+                "La autorización del hospital para ingresar al paciente",
+                "La conformidad libre y consciente del paciente tras recibir información adecuada",
+                "La firma del médico responsable antes de una cirugía",
+                "La autorización de familiares para acceder a la historia clínica"
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 13",
+            question: "¿Qué documento refleja la asistencia prestada por los profesionales de enfermería y la evolución de los cuidados?",
+            options: [
+                "Informe quirúrgico",
+                "Planificación de cuidados de enfermería",
+                "Informe clínico de alta",
+                "Hoja clínico-estadística"
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 13",
+            question: "En atención primaria, la historia clínica se caracteriza por:",
+            options: [
+                "Está orientada cronológicamente",
+                "Reflejar atención fragmentada en episodios",
+                "Estar orientada por problemas de salud y atención continuada",
+                "Usar exclusivamente documentos hospitalarios"
+            ],
+            correct: 2
+        },
+        {
+            category: "Tema 13",
+            question: "Cuál de los siguientes documentos básicos se incluyen en la historia clínica de atención primaria:",
+            options: [
+                "Informe quirúrgico",
+                "Hoja de biografía sanitaria",
+                "Informe de anestesia",
+                "Gráfica de constantes"
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 13",
+            question: "En la historia clínica electrónica, la confidencialidad implica que:",
+            options: [
+                "La información puede ser consultada por cualquier persona",
+                "Solo algunas personas autorizadas pueden acceder a los datos",
+                "Los datos se eliminan periódicamente",
+                "No es necesario registrar quién accede a la información"
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 13",
+            question: "Una ventaja de la historia clínica electrónica es:",
+            options: [
+                "Requiere menos inversión económica",
+                "Acceso inmediato y simultáneo a la información clínica",
+                "No necesita medidas de seguridad",
+                "Elimina la necesidad de informes clínicos"
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 13",
+            question: "Señale cual de estas afirmaciones no corresponde con la historia clinica electronica:",
+            options: [
+                "Permite generar informes clinicos facilmente",
+                "Acceso inmediato y simultaneo",
+                "Facilita la organizacion, integracion, ordenacion y actualizacion de la informacion",
+                "Impide el proceso de generar informes fácilmente"
+            ],
+            correct: 3
+        },
+        {
+            category: "Tema 13",
+            question: "Cual de estas es un inconveniente en cuanto a la HC electronica:",
+            options: [
+                "Necesidad de fuertes inversiones economicas",
+                "Seguridad y confidencialidad de los datos clinicos necesaria",
+                "Resistencia de los profesionales a nuevas formas de trabajo",
+                "Todas las anteriores"
+            ],
+            correct: 3
+        },
+        {
+            category: "Tema 13",
+            question: "¿Por qué motivos se accede a la HC?",
+            options: [
+                "Razones sociales y éticas",
+                "Razones jurídicas y éticas",
+                "Razones clínicas y jurídicas",
+                "Razones clínicas y sociales"
+            ],
+            correct: 2
+        },
+        {
+            category: "Tema 13",
+            question: "¿Qué artículo defiende el derecho del paciente al acceso de la documentación de la historia clínica?",
+            options: [
+                "16.3",
+                "18.1",
+                "23.2",
+                "17.5"
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 13",
+            question: "¿Cuál de las siguientes situaciones no puede limitar el derecho de acceso del paciente a la documentación de la HC?",
+            options: [
+                "La existencia de datos sobre terceras personas",
+                "La confidencialidad de las observaciones de los profesionales",
+                "La presencia de datos que perjudiquen la intimidad del paciente",
+                "El uso de anotaciones subjetivas por parte de profesionales que participen en la elaboración de la HC"
+            ],
+            correct: 3
+        },
+        {
+            category: "Tema 13",
+            question: "¿Cómo podemos consultar nuestra historia clínica de manera telemática?",
+            options: [
+                "Acceso en centros sanitarios",
+                "Acceso mediante ClicSalud+",
+                "No se puede acceder de forma telemática",
+                "Solo se permite el acceso online a profesionales"
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 13",
+            question: "¿Cómo podemos acceder a nuestra historia clínica?",
+            options: [
+                "Solicitandola previamente en los centros sanitarios habilitados",
+                "A través de CLicSalud+, telemáticamente",
+                "A y B son correctas",
+                "No se puede acceder a la HC sin ser profesional sanitario"
+            ],
+            correct: 2
+        },
+        {
+            category: "Tema 13",
+            question: "¿Cúando se le permite a un familiar acceder a la HC del paciente ingresado?",
+            options: [
+                "Siempre que quiera",
+                "Con autorización del paciente",
+                "Siempre que el paciente esté inconsciente o incapacitado sin valoración previa",
+                "B y C son correctas"
+            ],
+            correct: 1
+        },
+        {
+            category: "Tema 13",
+            question: "¿A qué HC puede acceder un profesional sanitario?",
+            options: [
+                "A la del paciente que preste asistencia",
+                "A la de cualquier persona",
+                "A la de sus familiares y allegados",
+                "Solo puede acceder a su HC"
+            ],
+            correct: 0
+        },
+        {
+            category: "Tema 13",
+            question: "Si una compañía de seguro quiere acceder a la HC de un paciente, ¿puede acceder?",
+            options: [
+                "Si, en caso de accidente",
+                "No, en ningún caso",
+                "Si, con autorización",
+                "Si, en caso de cambio de compañía"
+            ],
+            correct: 2
+        }
+    ];
+
+    // Variables de estado
+    let currentQuestionIndex = 0;
+    let score = { correct: 0, wrong: 0 };
+    let hasAnswered = false;
+
+    // Elementos del DOM
+    const screens = {
+        start: document.getElementById('start-screen'),
+        quiz: document.getElementById('quiz-content'),
+        results: document.getElementById('results-screen')
+    };
+    
+    const ui = {
+        questionText: document.getElementById('question-text'),
+        questionCategory: document.getElementById('question-category'),
+        optionsContainer: document.getElementById('options-container'),
+        currentQNum: document.getElementById('current-q-num'),
+        totalQNum: document.getElementById('total-q-num'),
+        scoreCorrect: document.getElementById('score-correct'),
+        scoreWrong: document.getElementById('score-wrong'),
+        progressBar: document.getElementById('progress-bar'),
+        nextBtn: document.getElementById('next-btn'),
+        finalScore: document.getElementById('final-score'),
+        finalCorrect: document.getElementById('final-correct'),
+        finalWrong: document.getElementById('final-wrong'),
+        feedbackMsg: document.getElementById('feedback-message')
+    };
+
+    function startQuiz() {
+        screens.start.style.display = 'none';
+        screens.quiz.style.display = 'flex';
+        ui.totalQNum.textContent = questionsDB.length;
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        hasAnswered = false;
+        ui.nextBtn.style.display = 'none';
+        
+        const q = questionsDB[currentQuestionIndex];
+        
+        // Actualizar UI
+        ui.currentQNum.textContent = currentQuestionIndex + 1;
+        ui.questionCategory.textContent = q.category;
+        ui.questionText.textContent = q.question;
+        
+        // Barra de progreso
+        const progress = ((currentQuestionIndex) / questionsDB.length) * 100;
+        ui.progressBar.style.width = `${progress}%`;
+
+        // Generar opciones
+        ui.optionsContainer.innerHTML = '';
+        q.options.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.textContent = opt;
+            btn.onclick = () => checkAnswer(index, btn);
+            ui.optionsContainer.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(selectedIndex, selectedBtn) {
+        if (hasAnswered) return;
+        hasAnswered = true;
+
+        const q = questionsDB[currentQuestionIndex];
+        const options = ui.optionsContainer.children;
+
+        // Mostrar correcta e incorrecta
+        if (selectedIndex === q.correct) {
+            selectedBtn.classList.add('correct');
+            score.correct++;
+        } else {
+            selectedBtn.classList.add('wrong');
+            options[q.correct].classList.add('correct'); // Mostrar la verdadera
+            score.wrong++;
+        }
+
+        updateScoreBoard();
+        
+        // Mostrar botón siguiente
+        ui.nextBtn.style.display = 'block';
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        
+        if (currentQuestionIndex < questionsDB.length) {
+            loadQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function updateScoreBoard() {
+        ui.scoreCorrect.textContent = score.correct;
+        ui.scoreWrong.textContent = score.wrong;
+    }
+
+    function showResults() {
+        screens.quiz.style.display = 'none';
+        screens.results.style.display = 'flex';
+        ui.progressBar.style.width = '100%';
+
+        ui.finalScore.textContent = score.correct;
+        ui.finalCorrect.textContent = score.correct;
+        ui.finalWrong.textContent = score.wrong;
+
+        const percentage = (score.correct / questionsDB.length) * 100;
+        let msg = "";
+        if (percentage >= 90) msg = "¡Excelente! Dominas el temario.";
+        else if (percentage >= 70) msg = "¡Muy bien! Estás listo.";
+        else if (percentage >= 50) msg = "Aprobado, pero repasa los fallos.";
+        else msg = "Necesitas estudiar un poco más.";
+        
+        ui.feedbackMsg.textContent = msg;
+    }
+
+    function restartQuiz() {
+        currentQuestionIndex = 0;
+        score = { correct: 0, wrong: 0 };
+        updateScoreBoard();
+        screens.results.style.display = 'none';
+        startQuiz();
+    }
+</script>
+
+</body>
+</html>
